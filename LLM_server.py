@@ -1,5 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from ollama import chat
 
 class QueryHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -16,7 +17,7 @@ class QueryHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write(b'OK')
+        self.wfile.write(b'OK\n')
     
     def do_POST(self):
         # Handle POST requests
@@ -47,11 +48,22 @@ class QueryHandler(BaseHTTPRequestHandler):
             print(f"Image saved as: {filename}")
             print(f"Image size: {len(body)} bytes")
             
+            response = chat(
+                model='gemma3:12b',
+                messages=[
+                    {
+                    'role': 'user',
+                    'content': 'What is in this image? Be concise.',
+                    'images': [filename],
+                    }
+                ],
+            )
+            print(response.message.content)
             # Send 200 OK response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            response = f'{{"status": "success", "filename": "{filename}", "size": {len(body)}}}'
+            response = f'{{"status": "success", "filename": "{filename}", "description": "{response.message.content}", "size": {len(body)}}}\n'
             self.wfile.write(response.encode())
         else:
             # Handle other POST requests
