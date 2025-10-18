@@ -19,18 +19,50 @@ class QueryHandler(BaseHTTPRequestHandler):
         self.wfile.write(b'OK')
     
     def do_POST(self):
-        # Handle POST requests similarly
+        # Handle POST requests
         content_length = int(self.headers.get('Content-Length', 0))
-        body = self.rfile.read(content_length)
+        content_type = self.headers.get('Content-Type', '')
         
         print(f"Received POST request: {self.path}")
-        print(f"Body: {body.decode('utf-8', errors='ignore')}")
+        print(f"Content-Type: {content_type}")
         
-        # Send 200 OK response
-        self.send_response(200)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b'OK')
+        # Handle image upload endpoint
+        if self.path == '/upload-image':
+            body = self.rfile.read(content_length)
+            
+            # Save the image to disk
+            filename = 'uploaded_image.jpg'
+            
+            # Try to determine file extension from content-type
+            if 'image/png' in content_type:
+                filename = 'uploaded_image.png'
+            elif 'image/jpeg' in content_type or 'image/jpg' in content_type:
+                filename = 'uploaded_image.jpg'
+            elif 'image/gif' in content_type:
+                filename = 'uploaded_image.gif'
+            
+            with open(filename, 'wb') as f:
+                f.write(body)
+            
+            print(f"Image saved as: {filename}")
+            print(f"Image size: {len(body)} bytes")
+            
+            # Send 200 OK response
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = f'{{"status": "success", "filename": "{filename}", "size": {len(body)}}}'
+            self.wfile.write(response.encode())
+        else:
+            # Handle other POST requests
+            body = self.rfile.read(content_length)
+            print(f"Body: {body.decode('utf-8', errors='ignore')}")
+            
+            # Send 200 OK response
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'OK')
     
     def log_message(self, format, *args):
         # Suppress default logging to keep output clean
