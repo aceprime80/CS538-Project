@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from ollama import chat
+import time
 
 class QueryHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -48,6 +49,7 @@ class QueryHandler(BaseHTTPRequestHandler):
             print(f"Image saved as: {filename}")
             print(f"Image size: {len(body)} bytes")
             
+            start_time = time.perf_counter()
             response = chat(
                 model='gemma3:12b',
                 messages=[
@@ -58,6 +60,9 @@ class QueryHandler(BaseHTTPRequestHandler):
                     }
                 ],
             )
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            print(f"LLM Inference elapsed time: {elapsed_time:.5f} seconds")
             print(response.message.content)
             # Send 200 OK response
             self.send_response(200)
