@@ -10,5 +10,5 @@ if len(sys.argv) == 3:
 file_type = path.split(".")[1]
 file_binary_data = open(path, "rb").read()
 response = requests.post(url=dst, headers={"Content-Type":f'image/{file_type}'}, data=file_binary_data)
-print(response.elapsed)
+print("THIS IS RESPONSE.ELAPSED", response.elapsed)
 print(response.text)
