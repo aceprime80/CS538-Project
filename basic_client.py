@@ -8,6 +8,8 @@ path = "test_images/skyline.png"
 if len(sys.argv) == 3:
     path = sys.argv[2]
 file_type = path.split(".")[1]
+if file_type == "jpg":
+    file_type = "jpeg"
 file_binary_data = open(path, "rb").read()
 response = requests.post(url=dst, headers={"Content-Type":f'image/{file_type}'}, data=file_binary_data)
 print(response.elapsed)
